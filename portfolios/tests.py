@@ -41,6 +41,27 @@ class PortfolioTest(TestCase):
 
         self.assertEqual(self.test_portfolio.value(self.test_date), expected_value)
 
+    def test_profit_for_date_range(self):
+        """The `profit` method should return the total profit of a portfolio for a given date range."""
+        start_date = self.test_date - timedelta(days=5)
+        end_date = self.test_date + timedelta(days=5)
+
+        # The portfolio's profit should be the sum of the profits its holdings over the date range.
+        expected_profit = Decimal("0")
+
+        for symbol, quantity in self.test_holding_data.items():
+            stock = Stock.objects.get(symbol=symbol)
+            price_start = stock.price(start_date)
+            price_end = stock.price(end_date)
+
+            # Each holding's profit is its end price times its quantity minus its start price
+            # times its quantity. Factorizing the quantity, we get the formula below.
+            expected_profit += (price_end - price_start) * quantity
+
+        self.assertEqual(
+            self.test_portfolio.profit(start_date, end_date), expected_profit
+        )
+
 
 class StockTest(TestCase):
     def setUp(self):
