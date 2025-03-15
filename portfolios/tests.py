@@ -62,7 +62,7 @@ class StockTest(TestCase):
 
         with self.assertRaisesMessage(
             ValueError,
-            "Cannot get price of a stock for a future date",
+            "Cannot get the price of a stock for a future date.",
         ):
             self.test_stock.price(future_date)
 

@@ -31,8 +31,11 @@ class Stock(models.Model):
         If no price is found for the given date, a fake random price is created.
 
         Args:
-            date: The date for which to get the price.
+            date: The date for which to get the price. It must not be in the future.
         """
+        if date > date.today():
+            raise ValueError("Cannot get the price of a stock for a future date.")
+
         try:
             price = StockPrice.objects.get(stock=self, date=date).price
         except StockPrice.DoesNotExist:
