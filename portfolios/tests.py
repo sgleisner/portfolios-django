@@ -446,3 +446,29 @@ class HoldingTest(TestCase):
                 stock=self.test_stock,
                 quantity=200,
             )
+
+
+class PortfolioListViewTest(TestCase):
+    def setUp(self):
+        self.portfolio_names = [
+            "Pedro's Piggy Bank",
+            "Agustín's Ferocious Fund",
+            "Omar's Last-minute Investments",
+            "Andrés' Magic Money Making Machine",
+        ]
+
+        for name in self.portfolio_names:
+            Portfolio.objects.create(name=name)
+
+    def test_portfolio_list_view(self):
+        portfolios = Portfolio.objects.all()
+
+        response = self.client.get("/portfolios/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "portfolios/portfolio_list.html")
+        self.assertContains(response, "Portfolios")
+
+        for portfolio in portfolios:
+            self.assertContains(response, portfolio.name)
+
+        self.assertQuerysetEqual(response.context["portfolios"], portfolios)
