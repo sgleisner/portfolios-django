@@ -56,6 +56,16 @@ class StockTest(TestCase):
         self.assertEqual(stock_price.date, self.test_date)
         self.assertEqual(stock_price.price, created_price)
 
+    def test_price_with_future(self):
+        """The date passed to the `price` method must not be in the future."""
+        future_date = date.today() + timedelta(days=1)
+
+        with self.assertRaisesMessage(
+            ValueError,
+            "Cannot get price of a stock for a future date",
+        ):
+            self.test_stock.price(future_date)
+
 
 class StockPriceTest(TestCase):
     def setUp(self):
