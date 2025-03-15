@@ -6,12 +6,40 @@ from portfolios.models import Portfolio, Stock, StockPrice, Holding
 
 
 class PortfolioTest(TestCase):
+    def setUp(self):
+        self.test_portfolio = Portfolio.objects.create(name="Samy's Portfolio")
+        self.test_date = date(2016, 9, 18)
+        self.test_holding_data = {
+            "JUEMS": 10,
+            "FNTLST": 20,
+            "MERYL": 30,
+            "GEORG": 40,
+            "BRAD": 50,
+            "CHUCK": 60,
+        }
+
+        for symbol, quantity in self.test_holding_data.items():
+            stock = Stock.objects.create(symbol=symbol)
+            Holding.objects.create(
+                portfolio=self.test_portfolio,
+                stock=stock,
+                quantity=quantity,
+            )
+
     def test_create_portfolio(self):
         """A Portfolio can be created and retrieved with the correct data."""
-        Portfolio.objects.create(name="Samy's Portfolio")
-
         self.assertEqual(Portfolio.objects.count(), 1)
-        self.assertEqual(Portfolio.objects.first().name, "Samy's Portfolio")
+        self.assertEqual(Portfolio.objects.first().name, self.test_portfolio.name)
+
+    def test_value_for_date(self):
+        """The `value` method should return the total value of a portfolio for a given date."""
+        expected_value = Decimal("0")
+
+        for symbol, quantity in self.test_holding_data.items():
+            price = Stock.objects.get(symbol=symbol).price(self.test_date)
+            expected_value += price * quantity
+
+        self.assertEqual(self.test_portfolio.value(self.test_date), expected_value)
 
 
 class StockTest(TestCase):
