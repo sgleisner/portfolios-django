@@ -69,6 +69,9 @@ class Portfolio(models.Model):
 
         return (profit, annualized_return)
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Stock(models.Model):
     """
@@ -102,6 +105,9 @@ class Stock(models.Model):
 
         return price
 
+    def __str__(self) -> str:
+        return self.symbol
+
     class Meta:
         constraints = [
             models.CheckConstraint(
@@ -128,6 +134,9 @@ class StockPrice(models.Model):
     # as Decimal to prevent floating-point arithmetic issues.
     # See: https://floating-point-gui.de/
     price = models.DecimalField(max_digits=10, decimal_places=4)
+
+    def __str__(self) -> str:
+        return f"{self.stock.symbol} - {self.date} - ${self.price:.4f}"
 
     class Meta:
         constraints = [
@@ -158,6 +167,9 @@ class Holding(models.Model):
     )
     stock = models.ForeignKey(Stock, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
+
+    def __str__(self) -> str:
+        return f"{self.stock.symbol} - {self.quantity} - {self.portfolio.name}"
 
     class Meta:
         constraints = [
