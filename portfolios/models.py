@@ -52,6 +52,11 @@ class Portfolio(models.Model):
         final_value = self.value(end_date)
         days = (end_date - start_date).days
 
+        # Since neither prices nor holding quantities can be zero, if any
+        # of the values is zero, the profit will be zero as well.
+        if initial_value == 0 or final_value == 0:
+            return (Decimal("0"), Decimal("0"))
+
         profit = final_value - initial_value
 
         # Calculate the annualized return using the formula:
@@ -114,7 +119,7 @@ class StockPrice(models.Model):
     Attributes:
         stock (Stock): The stock whose price is being recorded.
         date (date): The date of the price.
-        price (Decimal): The price of the stock on the given date.
+        price (Decimal): The price of the stock on the given date, must be greater than 0.
     """
 
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
@@ -134,7 +139,7 @@ class StockPrice(models.Model):
             ),
             models.CheckConstraint(
                 check=models.Q(price__gt=Decimal("0")),
-                name="non_negative_price",
+                name="positive_price",
             ),
         ]
 
@@ -145,7 +150,7 @@ class Holding(models.Model):
     Attributes:
         portfolio (Portfolio): The portfolio that holds the stock.
         stock (Stock): The stock being held.
-        quantity (int): The number of shares of the stock being held.
+        quantity (int): The number of shares of the stock being held, must be greater than 0.
     """
 
     portfolio = models.ForeignKey(
@@ -159,5 +164,9 @@ class Holding(models.Model):
             models.UniqueConstraint(
                 fields=["portfolio", "stock"],
                 name="unique_portfolio_stock",
+            ),
+            models.CheckConstraint(
+                check=models.Q(quantity__gt=0),
+                name="positive_quantity",
             ),
         ]
