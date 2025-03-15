@@ -41,6 +41,11 @@ class PortfolioTest(TestCase):
 
         self.assertEqual(self.test_portfolio.value(self.test_date), expected_value)
 
+    def test_value_empty_portfolio(self):
+        """The `value` method should return zero for an empty portfolio."""
+        empty_portfolio = Portfolio.objects.create(name="The Voidfolio")
+        self.assertEqual(empty_portfolio.value(self.test_date), Decimal("0"))
+
     def test_profit_for_valid_date_range(self):
         """The `profit` method's return should contain the total profit of a portfolio for a given, valid date range."""
         start_date = self.test_date - timedelta(days=5)
@@ -197,6 +202,19 @@ class PortfolioTest(TestCase):
         # Upon further inspection, the result reported by Investopedia is actually
         # rounded to 3 decimal places, so we use that same rounding to compare.
         self.assertEqual(round(annualized_return, 3), Decimal("0.145"))
+
+    def test_profit_empty_portfolio(self):
+        """The `profit` method should return zero profit and annualized return for an empty portfolio."""
+        # Since the price of stocks cannot be zero, a portfolio with nil value holds no stocks.
+        # For those cases, we assume both the profit and annualized return are zero.
+        empty_portfolio = Portfolio.objects.create(name="The Voidfolio")
+
+        start_date = self.test_date
+        end_date = start_date + timedelta(days=5)
+        profit, annualized_return = empty_portfolio.profit(start_date, end_date)
+
+        self.assertEqual(profit, Decimal("0"))
+        self.assertEqual(annualized_return, Decimal("0"))
 
 
 class StockTest(TestCase):
@@ -368,6 +386,15 @@ class HoldingTest(TestCase):
                 portfolio=self.test_portfolio,
                 stock=self.test_stock,
                 quantity=-100,
+            )
+
+    def test_quantity_non_zero(self):
+        """A Holding's quantity must not be equal to zero."""
+        with self.assertRaises(IntegrityError):
+            Holding.objects.create(
+                portfolio=self.test_portfolio,
+                stock=self.test_stock,
+                quantity=0,
             )
 
     def test_portfolio_and_stock_unique_together(self):
