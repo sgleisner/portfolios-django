@@ -63,7 +63,7 @@ class PortfolioTest(TestCase):
         )
 
     def test_profit_for_invalid_date_range(self):
-        """The `profit` method should raise an exception if the start date is not before the end date."""
+        """The `profit` method should raise an exception if the received date range is invalid."""
         start_date = self.test_date + timedelta(days=5)
         end_date = self.test_date - timedelta(days=5)
 
@@ -78,6 +78,19 @@ class PortfolioTest(TestCase):
             ValueError, "The start date must be before the end date."
         ):
             self.test_portfolio.profit(self.test_date, self.test_date)
+
+        # Case 3: end date is in the future
+        future_date = date.today() + timedelta(days=1)
+        with self.assertRaisesMessage(
+            ValueError, "Received dates must not be in the future."
+        ):
+            self.test_portfolio.profit(date.today(), future_date)
+
+        # Case 4: both dates are in the future
+        with self.assertRaisesMessage(
+            ValueError, "Received dates must not be in the future."
+        ):
+            self.test_portfolio.profit(future_date, future_date + timedelta(days=1))
 
 
 class StockTest(TestCase):
