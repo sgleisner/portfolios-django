@@ -93,7 +93,7 @@ class PortfolioTest(TestCase):
             self.test_portfolio.profit(future_date, future_date + timedelta(days=1))
 
     def test_profit_annualized_return_zero(self):
-        """The `profit` method's return should contain an annualized return of zero if the initial and final values are equal."""
+        """The `profit` method should calculate the annualized return as zero if the portfolio's value doesn't change."""
         start_date = self.test_date
         end_date = start_date + timedelta(days=100)
 
@@ -109,6 +109,94 @@ class PortfolioTest(TestCase):
         # The profit's method return second element should be the annualized return
         _, annualized_return = self.test_portfolio.profit(start_date, end_date)
         self.assertEqual(annualized_return, Decimal("0"))
+
+    def test_profit_annualized_return_positive_over_a_year(self):
+        """The `profit` method should correctly calculate a positive annualized return over a year."""
+        # For a period of exactly one year, the annualized return is equal to the total return,
+        # which is the difference between the end and start prices divided by the start price.
+        start_date = self.test_date
+        end_date = start_date + timedelta(days=365)
+
+        for holding in self.test_portfolio.holdings.all():
+            stock = holding.stock
+
+            # This will implicitly create a random `StockPrice` for the start date
+            price_start = stock.price(start_date)
+
+            # Create a stock price for the end date with a higher price, keeping it
+            # within the maximum allowed price
+            price_end = min(price_start * 2, Decimal("999999.9999"))
+            StockPrice.objects.create(stock=stock, date=end_date, price=price_end)
+
+        # The profit's method return second element should be the annualized return
+        _, annualized_return = self.test_portfolio.profit(start_date, end_date)
+
+        # The annualized return should be positive and equal to the total return
+        initial_value = self.test_portfolio.value(start_date)
+        final_value = self.test_portfolio.value(end_date)
+        total_return = (final_value - initial_value) / initial_value
+
+        self.assertGreater(annualized_return, Decimal("0"))
+
+        # Despite Decimal's floating point precision, the result might be slightly off
+        # so we use assertAlmostEqual to compare the two values up to 7 decimal places (the default).
+        self.assertAlmostEqual(annualized_return, total_return)
+
+    def test_profit_annualized_return_negative_over_a_year(self):
+        """The `profit` method should correctly calculate a negative annualized return over a year."""
+        # For a period of exactly one year, the annualized return is equal to the total return,
+        # which is the difference between the end and start prices divided by the start price.
+        start_date = self.test_date
+        end_date = start_date + timedelta(days=365)
+
+        for holding in self.test_portfolio.holdings.all():
+            stock = holding.stock
+
+            # This will implicitly create a random `StockPrice` for the start date
+            price_start = stock.price(start_date)
+
+            # Create a stock price for the end date with a lower price, keeping it
+            # within the minimum allowed price
+            price_end = max(price_start / 2, Decimal("0.0001"))
+            StockPrice.objects.create(stock=stock, date=end_date, price=price_end)
+
+        # The profit's method return second element should be the annualized return
+        _, annualized_return = self.test_portfolio.profit(start_date, end_date)
+
+        # The annualized return should be negative and equal to the total return
+        initial_value = self.test_portfolio.value(start_date)
+        final_value = self.test_portfolio.value(end_date)
+        total_return = (final_value - initial_value) / initial_value
+
+        self.assertLess(annualized_return, Decimal("0"))
+
+        # Despite Decimal's floating point precision, the result might be slightly off
+        # so we use assertAlmostEqual to compare the two values up to 7 decimal places (the default).
+        self.assertAlmostEqual(annualized_return, total_return)
+
+    def test_profit_annualized_return_example(self):
+        """The `profit` method should correctly calculate the annualized return for a given example."""
+        # For a cummulative return of 23.74% over 575 days, the annualized return is 0.145
+        # Example taken from Investopedia:
+        # https://www.investopedia.com/terms/a/annualized-total-return.asp#toc-annualized-return-formula-and-calculation
+        start_date = self.test_date
+        end_date = start_date + timedelta(days=575)
+
+        # Create a porfolio with a single stock share and a return of 23.74% over 575 days
+        portfolio = Portfolio.objects.create(name="Investopedia's Portfolio")
+        stock = Stock.objects.create(symbol="SAMYG")
+        initial_price = Decimal("100")
+        final_price = Decimal("123.74")  # +23.74%
+        StockPrice.objects.create(stock=stock, date=start_date, price=initial_price)
+        StockPrice.objects.create(stock=stock, date=end_date, price=final_price)
+        Holding.objects.create(portfolio=portfolio, stock=stock, quantity=1)
+
+        # The profit's method return second element should be the annualized return
+        _, annualized_return = portfolio.profit(start_date, end_date)
+
+        # Despite Decimal's floating point precision, the result might be slightly off
+        # so we use assertAlmostEqual to compare the two values up to 7 decimal places (the default).
+        self.assertAlmostEqual(annualized_return, Decimal("0.145"))
 
 
 class StockTest(TestCase):
