@@ -37,6 +37,9 @@ class Portfolio(models.Model):
             start_date: The start date of the date range (inclusive).
             end_date: The end date of the date range (inclusive).
         """
+        if start_date >= end_date:
+            raise ValueError("The start date must be before the end date.")
+
         return self.value(end_date) - self.value(start_date)
 
 
