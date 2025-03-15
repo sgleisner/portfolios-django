@@ -40,6 +40,10 @@ class Portfolio(models.Model):
         if start_date >= end_date:
             raise ValueError("The start date must be before the end date.")
 
+        today = date.today()
+        if start_date > today or end_date > today:
+            raise ValueError("Received dates must not be in the future.")
+
         return self.value(end_date) - self.value(start_date)
 
 
