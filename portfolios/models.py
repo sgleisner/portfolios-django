@@ -29,6 +29,16 @@ class Portfolio(models.Model):
 
         return value
 
+    def profit(self, start_date: date, end_date: date) -> Decimal:
+        """
+        Returns the total profit of the portfolio over a given date range.
+
+        Args:
+            start_date: The start date of the date range (inclusive).
+            end_date: The end date of the date range (inclusive).
+        """
+        return self.value(end_date) - self.value(start_date)
+
 
 class Stock(models.Model):
     """
