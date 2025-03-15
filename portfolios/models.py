@@ -1,5 +1,7 @@
 from django.db import models
 from decimal import Decimal
+from datetime import date
+import random
 
 
 class Portfolio(models.Model):
@@ -22,6 +24,25 @@ class Stock(models.Model):
     """
 
     symbol = models.CharField(max_length=10, unique=True)
+
+    def price(self, date: date) -> Decimal:
+        """
+        Returns the price of the stock on a given date.
+        If no price is found for the given date, a fake random price is created.
+
+        Args:
+            date: The date for which to get the price.
+        """
+        try:
+            price = StockPrice.objects.get(stock=self, date=date).price
+        except StockPrice.DoesNotExist:
+            # Create a StockPrice with a fake random price and return its value.
+            random_price = Decimal(f"{random.uniform(1, 999999):.4f}")
+            price = StockPrice.objects.create(
+                stock=self, date=date, price=random_price
+            ).price
+
+        return price
 
     class Meta:
         constraints = [
