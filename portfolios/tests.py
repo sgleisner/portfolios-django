@@ -41,8 +41,8 @@ class PortfolioTest(TestCase):
 
         self.assertEqual(self.test_portfolio.value(self.test_date), expected_value)
 
-    def test_profit_for_date_range(self):
-        """The `profit` method should return the total profit of a portfolio for a given date range."""
+    def test_profit_for_valid_date_range(self):
+        """The `profit` method should return the total profit of a portfolio for a given, valid date range."""
         start_date = self.test_date - timedelta(days=5)
         end_date = self.test_date + timedelta(days=5)
 
@@ -61,6 +61,23 @@ class PortfolioTest(TestCase):
         self.assertEqual(
             self.test_portfolio.profit(start_date, end_date), expected_profit
         )
+
+    def test_profit_for_invalid_date_range(self):
+        """The `profit` method should raise an exception if the start date is not before the end date."""
+        start_date = self.test_date + timedelta(days=5)
+        end_date = self.test_date - timedelta(days=5)
+
+        # Case 1: start date is after end date
+        with self.assertRaisesMessage(
+            ValueError, "The start date must be before the end date."
+        ):
+            self.test_portfolio.profit(start_date, end_date)
+
+        # Case 2: start date is equal to end date
+        with self.assertRaisesMessage(
+            ValueError, "The start date must be before the end date."
+        ):
+            self.test_portfolio.profit(self.test_date, self.test_date)
 
 
 class StockTest(TestCase):
