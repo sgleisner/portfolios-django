@@ -14,6 +14,21 @@ class Portfolio(models.Model):
 
     name = models.CharField(max_length=255)
 
+    def value(self, date: date) -> Decimal:
+        """
+        Returns the total value of the portfolio on a given date.
+        The value is calculated as the sum of the value of each stock holding.
+
+        Args:
+            date: The date for which to get the value.
+        """
+        value = sum(
+            holding.stock.price(date) * holding.quantity
+            for holding in self.holdings.all()
+        )
+
+        return value
+
 
 class Stock(models.Model):
     """
@@ -98,7 +113,9 @@ class Holding(models.Model):
         quantity (int): The number of shares of the stock being held.
     """
 
-    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
+    portfolio = models.ForeignKey(
+        Portfolio, on_delete=models.CASCADE, related_name="holdings"
+    )
     stock = models.ForeignKey(Stock, on_delete=models.PROTECT)
     quantity = models.PositiveIntegerField()
 
