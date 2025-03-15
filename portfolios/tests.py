@@ -42,7 +42,7 @@ class PortfolioTest(TestCase):
         self.assertEqual(self.test_portfolio.value(self.test_date), expected_value)
 
     def test_profit_for_valid_date_range(self):
-        """The `profit` method should return the total profit of a portfolio for a given, valid date range."""
+        """The `profit` method's return should contain the total profit of a portfolio for a given, valid date range."""
         start_date = self.test_date - timedelta(days=5)
         end_date = self.test_date + timedelta(days=5)
 
@@ -58,9 +58,9 @@ class PortfolioTest(TestCase):
             # times its quantity. Factorizing the quantity, we get the formula below.
             expected_profit += (price_end - price_start) * quantity
 
-        self.assertEqual(
-            self.test_portfolio.profit(start_date, end_date), expected_profit
-        )
+        # The profit's method return first element should be the total profit
+        profit, _ = self.test_portfolio.profit(start_date, end_date)
+        self.assertEqual(profit, expected_profit)
 
     def test_profit_for_invalid_date_range(self):
         """The `profit` method's should raise an exception if the received date range is invalid."""
@@ -107,7 +107,7 @@ class PortfolioTest(TestCase):
             StockPrice.objects.create(stock=stock, date=end_date, price=price)
 
         # The profit's method return second element should be the annualized return
-        annualized_return = self.test_portfolio.profit(start_date, end_date)[1]
+        _, annualized_return = self.test_portfolio.profit(start_date, end_date)
         self.assertEqual(annualized_return, Decimal("0"))
 
 

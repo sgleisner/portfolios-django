@@ -29,13 +29,17 @@ class Portfolio(models.Model):
 
         return value
 
-    def profit(self, start_date: date, end_date: date) -> Decimal:
+    def profit(self, start_date: date, end_date: date) -> tuple[Decimal, Decimal]:
         """
-        Returns the total profit of the portfolio over a given date range.
+        Returns the total profit of the portfolio over a given date range and its
+        annualized return as a raw decimal value.
 
         Args:
             start_date: The start date of the date range (inclusive).
             end_date: The end date of the date range (inclusive).
+
+        Returns:
+            (profit, annualized_return): A tuple containing the expected values.
         """
         if start_date >= end_date:
             raise ValueError("The start date must be before the end date.")
@@ -44,7 +48,12 @@ class Portfolio(models.Model):
         if start_date > today or end_date > today:
             raise ValueError("Received dates must not be in the future.")
 
-        return self.value(end_date) - self.value(start_date)
+        profit = self.value(end_date) - self.value(start_date)
+
+        # TODO: Implement the actual calculation of the annualized return.
+        annualized_return = Decimal("0")
+
+        return (profit, annualized_return)
 
 
 class Stock(models.Model):
