@@ -63,7 +63,7 @@ class PortfolioTest(TestCase):
         )
 
     def test_profit_for_invalid_date_range(self):
-        """The `profit` method should raise an exception if the received date range is invalid."""
+        """The `profit` method's should raise an exception if the received date range is invalid."""
         start_date = self.test_date + timedelta(days=5)
         end_date = self.test_date - timedelta(days=5)
 
@@ -91,6 +91,24 @@ class PortfolioTest(TestCase):
             ValueError, "Received dates must not be in the future."
         ):
             self.test_portfolio.profit(future_date, future_date + timedelta(days=1))
+
+    def test_profit_annualized_return_zero(self):
+        """The `profit` method's return should contain an annualized return of zero if the initial and final values are equal."""
+        start_date = self.test_date
+        end_date = start_date + timedelta(days=100)
+
+        for holding in self.test_portfolio.holdings.all():
+            stock = holding.stock
+
+            # This will implicitly create a `StockPrice` for the start date
+            price = stock.price(start_date)
+
+            # Create a stock price for the end date with the same price
+            StockPrice.objects.create(stock=stock, date=end_date, price=price)
+
+        # The profit's method return second element should be the annualized return
+        annualized_return = self.test_portfolio.profit(start_date, end_date)[1]
+        self.assertEqual(annualized_return, Decimal("0"))
 
 
 class StockTest(TestCase):
