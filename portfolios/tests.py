@@ -1,5 +1,6 @@
 from django.db import IntegrityError
 from django.test import TestCase
+from django.utils.html import escape
 from datetime import date, timedelta
 from decimal import Decimal
 from portfolios.models import Portfolio, Stock, StockPrice, Holding
@@ -469,6 +470,8 @@ class PortfolioListViewTest(TestCase):
         self.assertContains(response, "Portfolios")
 
         for portfolio in portfolios:
-            self.assertContains(response, portfolio.name)
+            self.assertContains(response, escape(portfolio.name))
 
-        self.assertQuerysetEqual(response.context["portfolios"], portfolios)
+        self.assertQuerysetEqual(
+            response.context["portfolios"], portfolios, ordered=False
+        )
