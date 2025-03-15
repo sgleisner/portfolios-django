@@ -48,10 +48,19 @@ class Portfolio(models.Model):
         if start_date > today or end_date > today:
             raise ValueError("Received dates must not be in the future.")
 
-        profit = self.value(end_date) - self.value(start_date)
+        initial_value = self.value(start_date)
+        final_value = self.value(end_date)
+        days = (end_date - start_date).days
 
-        # TODO: Implement the actual calculation of the annualized return.
-        annualized_return = Decimal("0")
+        profit = final_value - initial_value
+
+        # Calculate the annualized return using the formula:
+        # annualized_return = ( 1 + (final_value - initial_value) / initial_value ) ^ (365 / days) - 1
+        # Which can be derived from the formulas in the following links:
+        # https://www.investopedia.com/terms/a/annualized-total-return.asp
+        # https://www.investopedia.com/terms/c/cumulativereturn.asp
+        # When simplified, it becomes:
+        annualized_return = (final_value / initial_value) ** (Decimal("365") / days) - 1
 
         return (profit, annualized_return)
 

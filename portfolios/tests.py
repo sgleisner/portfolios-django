@@ -194,9 +194,9 @@ class PortfolioTest(TestCase):
         # The profit's method return second element should be the annualized return
         _, annualized_return = portfolio.profit(start_date, end_date)
 
-        # Despite Decimal's floating point precision, the result might be slightly off
-        # so we use assertAlmostEqual to compare the two values up to 7 decimal places (the default).
-        self.assertAlmostEqual(annualized_return, Decimal("0.145"))
+        # Upon further inspection, the result reported by Investopedia is actually
+        # rounded to 3 decimal places, so we use that same rounding to compare.
+        self.assertEqual(round(annualized_return, 3), Decimal("0.145"))
 
 
 class StockTest(TestCase):
