@@ -26,6 +26,10 @@ class PortfolioTest(TestCase):
                 quantity=quantity,
             )
 
+    def test_str(self):
+        """The string representation of a Portfolio should be its name."""
+        self.assertEqual(str(self.test_portfolio), self.test_portfolio.name)
+
     def test_create_portfolio(self):
         """A Portfolio can be created and retrieved with the correct data."""
         self.assertEqual(Portfolio.objects.count(), 1)
@@ -222,6 +226,10 @@ class StockTest(TestCase):
         self.test_stock = Stock.objects.create(symbol="FNTL")
         self.test_date = date(2016, 9, 18)
 
+    def test_str(self):
+        """The string representation of a Stock should be its symbol."""
+        self.assertEqual(str(self.test_stock), self.test_stock.symbol)
+
     def test_create_stock(self):
         """A Stock can be created and retrieved with the correct data."""
         self.assertEqual(Stock.objects.count(), 1)
@@ -274,6 +282,20 @@ class StockPriceTest(TestCase):
     def setUp(self):
         self.test_stock = Stock.objects.create(symbol="FNTL")
         self.test_date = date(2016, 9, 18)
+
+    def test_str(self):
+        """The string representation of a StockPrice should be its stock's symbol, date and price."""
+        test_price = Decimal("100")
+        stock_price = StockPrice.objects.create(
+            stock=self.test_stock,
+            date=self.test_date,
+            price=test_price,
+        )
+
+        self.assertEqual(
+            str(stock_price),
+            f"{stock_price.stock.symbol} - {stock_price.date} - ${stock_price.price:,.4f}",
+        )
 
     def test_create_stock_price(self):
         """A StockPrice can be created and retrieved with the correct data."""
@@ -362,8 +384,21 @@ class StockPriceTest(TestCase):
 
 class HoldingTest(TestCase):
     def setUp(self):
-        self.test_portfolio = Portfolio.objects.create()
+        self.test_portfolio = Portfolio.objects.create(name="Samy's Portfolio")
         self.test_stock = Stock.objects.create(symbol="FNTL")
+
+    def test_str(self):
+        """The string representation of a Holding should be its stock's symbol, quantity and portfolio's name."""
+        holding = Holding.objects.create(
+            portfolio=self.test_portfolio,
+            stock=self.test_stock,
+            quantity=100,
+        )
+
+        self.assertEqual(
+            str(holding),
+            f"{holding.stock.symbol} - {holding.quantity} - {holding.portfolio.name}",
+        )
 
     def test_create_holding(self):
         """A Holding can be created and retrieved with the correct data."""
