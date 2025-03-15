@@ -15,24 +15,46 @@ class PortfolioTest(TestCase):
 
 
 class StockTest(TestCase):
+    def setUp(self):
+        self.test_stock = Stock.objects.create(symbol="FNTL")
+        self.test_date = date(2016, 9, 18)
+
     def test_create_stock(self):
         """A Stock can be created and retrieved with the correct data."""
-        Stock.objects.create(symbol="FNTL")
-
         self.assertEqual(Stock.objects.count(), 1)
-        self.assertEqual(Stock.objects.first().symbol, "FNTL")
+        self.assertEqual(Stock.objects.first().symbol, self.test_stock.symbol)
 
     def test_stock_symbol_unique(self):
         """A Stock's symbol must be unique."""
-        Stock.objects.create(symbol="FNTL")
-
         with self.assertRaises(IntegrityError):
-            Stock.objects.create(symbol="FNTL")
+            Stock.objects.create(symbol=self.test_stock.symbol)
 
     def test_symbol_not_empty(self):
         """A Stock's symbol cannot be empty."""
         with self.assertRaises(IntegrityError):
             Stock.objects.create(symbol="")
+
+    def test_price_get_existing_value(self):
+        """If there's a price for a given date, the `price` method should return it."""
+        test_price = Decimal("100")
+        StockPrice.objects.create(
+            stock=self.test_stock,
+            date=self.test_date,
+            price=test_price,
+        )
+
+        self.assertEqual(self.test_stock.price(self.test_date), test_price)
+
+    def test_price_create_new_value(self):
+        """If there's no price for a given date, the `price` method should create it."""
+        self.assertEqual(StockPrice.objects.count(), 0)
+
+        created_price = self.test_stock.price(self.test_date)
+
+        stock_price = StockPrice.objects.first()
+        self.assertEqual(stock_price.stock, self.test_stock)
+        self.assertEqual(stock_price.date, self.test_date)
+        self.assertEqual(stock_price.price, created_price)
 
 
 class StockPriceTest(TestCase):
