@@ -29,5 +29,36 @@
         {% endfor %}
       </tbody>
     </table>
+
+    <h2>Profit Calculation</h2>
+    <form method="get">
+      {{ form.as_p }}
+      <button type="submit">Calculate Profit</button>
+    </form>
+
+    {% if results %}
+    <h3>Profit from {{ results.start_date }} to {{ results.end_date }}</h3>
+    <p>
+      <strong>Initial value:</strong>
+      <span>${{ results.initial_value }}</span>
+    </p>
+    <p>
+      <strong>Final value:</strong>
+      <span>${{ results.final_value }}</span>
+    </p>
+    <p></p>
+    <p>
+      <strong>Days held:</strong>
+      <span>{{ results.days_held }}</span>
+    </p>
+    <p>
+      <strong>Profit:</strong>
+      <span>${{ results.profit }}</span>
+    </p>
+    <p>
+      <strong>Annualized return:</strong>
+      <span>{{ results.annualized_return|floatformat:4 }}%</span>
+    </p>
+    {% endif %}
   </body>
 </html>

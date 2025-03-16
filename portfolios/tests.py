@@ -548,28 +548,39 @@ class PortfolioDetailViewTest(TestCase):
 
     def test_profit_calculation(self):
         """The results of the profit calculation should be displayed."""
-        response = self.client.get(f"/portfolios/{self.test_portfolio.id}/")
         start_date = self.test_date
         end_date = start_date + timedelta(days=100)
+
+        response = self.client.get(
+            f"/portfolios/{self.test_portfolio.id}/",
+            {"start_date": start_date, "end_date": end_date},
+        )
+
+        print(
+            "Request GET Data:",
+            response.request["REQUEST_METHOD"],
+            response.request["PATH_INFO"],
+            response.request["QUERY_STRING"],
+        )
 
         profit, annualized_return = self.test_portfolio.profit(start_date, end_date)
 
         # A thourough test should look up that the data is actually rendered in the page,
         # but since it's rendered value depends on how the template renders it due to rounding
         # and localization, we'll just check for the values to be present in the context.
-        self.assertEqual(response.context["profit"], profit)
-        self.assertEqual(response.context["annualized_return"], annualized_return)
-        self.assertEqual(response.context["start_date"], start_date)
-        self.assertEqual(response.context["end_date"], end_date)
+        results = response.context["results"]
+        self.assertEqual(results["profit"], profit)
         self.assertEqual(
-            response.context["initial_value"],
+            results["annualized_return"], annualized_return * 100  # as percentage
+        )
+        self.assertEqual(results["start_date"], start_date)
+        self.assertEqual(results["end_date"], end_date)
+        self.assertEqual(results["days_held"], (end_date - start_date).days)
+        self.assertEqual(
+            results["initial_value"],
             self.test_portfolio.value(start_date),
         )
         self.assertEqual(
-            response.context["final_value"],
+            results["final_value"],
             self.test_portfolio.value(end_date),
-        )
-        self.assertEqual(
-            response.context["days_held"],
-            (end_date - start_date).days,
         )
