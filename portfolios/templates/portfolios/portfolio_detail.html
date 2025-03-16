@@ -52,6 +52,9 @@
                        required>
               </div>
               <div class="col-12">
+                {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+              </div>
+              <div class="col-12">
                 <button type="submit" class="btn btn-primary w-100 py-2">Calculate Profit</button>
               </div>
             </div>
