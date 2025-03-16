@@ -46,6 +46,12 @@ class PortfolioTest(TestCase):
 
         self.assertEqual(self.test_portfolio.value(self.test_date), expected_value)
 
+    def test_value_default_date(self):
+        """If no date is provided, the `value` method should return the total value of a portfolio for today."""
+        self.assertEqual(
+            self.test_portfolio.value(), self.test_portfolio.value(date.today())
+        )
+
     def test_value_empty_portfolio(self):
         """The `value` method should return zero for an empty portfolio."""
         empty_portfolio = Portfolio.objects.create(name="The Voidfolio")
@@ -277,6 +283,10 @@ class StockTest(TestCase):
             "Cannot get the price of a stock for a future date.",
         ):
             self.test_stock.price(future_date)
+
+    def test_price_default_date(self):
+        """If no date is provided, the `price` method should return the stock's current price."""
+        self.assertEqual(self.test_stock.price(), self.test_stock.price(date.today()))
 
 
 class StockPriceTest(TestCase):

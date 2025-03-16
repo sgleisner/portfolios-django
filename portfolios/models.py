@@ -1,6 +1,8 @@
+from typing import Optional
 from django.db import models
 from decimal import Decimal
 from datetime import date
+import datetime as dt
 import random
 
 
@@ -14,14 +16,18 @@ class Portfolio(models.Model):
 
     name = models.CharField(max_length=255)
 
-    def value(self, date: date) -> Decimal:
+    def value(self, date: Optional[dt.date] = None) -> Decimal:
         """
         Returns the total value of the portfolio on a given date.
         The value is calculated as the sum of the value of each stock holding.
 
         Args:
-            date: The date for which to get the value.
+            date: The date for which to get the value. Must not be in the future.
+                  Defaults to the current date.
         """
+        if date is None:
+            date = dt.date.today()
+
         value = sum(
             holding.stock.price(date) * holding.quantity
             for holding in self.holdings.all()
@@ -83,15 +89,19 @@ class Stock(models.Model):
 
     symbol = models.CharField(max_length=10, unique=True)
 
-    def price(self, date: date) -> Decimal:
+    def price(self, date: Optional[dt.date] = None) -> Decimal:
         """
         Returns the price of the stock on a given date.
         If no price is found for the given date, a fake random price is created.
 
         Args:
             date: The date for which to get the price. It must not be in the future.
+                  Defaults to the current date.
         """
-        if date > date.today():
+        if date is None:
+            date = dt.date.today()
+
+        if date > dt.date.today():
             raise ValueError("Cannot get the price of a stock for a future date.")
 
         try:
