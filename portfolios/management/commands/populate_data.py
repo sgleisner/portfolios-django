@@ -11,8 +11,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         fake = Faker()
 
-        total_stocks = 20
-        total_portfolios = 5
+        total_stocks = 200
+        total_portfolios = 10
 
         print("Creating fake data...")
 
@@ -41,7 +41,7 @@ class Command(BaseCommand):
 
         # Create holdings for each portfolio using the existing stocks
         for portfolio in tqdm(portfolios, desc="Creating holdings", unit="holding"):
-            for stock in random.sample(stocks, random.randint(1, 5)):
+            for stock in random.sample(stocks, random.randint(1, 10)):
                 quantity = random.randint(1, 100)
                 try:
                     Holding.objects.create(
