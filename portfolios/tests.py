@@ -526,3 +526,12 @@ class PortfolioDetailViewTest(TestCase):
         for holding in self.test_portfolio.holdings.all():
             self.assertContains(response, holding.stock.symbol)
             self.assertContains(response, holding.quantity)
+
+    def test_current_stock_values(self):
+        """The current value of each stock should be displayed."""
+        response = self.client.get(f"/portfolios/{self.test_portfolio.id}/")
+
+        for holding in self.test_portfolio.holdings.all():
+            current_value = holding.stock.price(self.today)
+            formatted_value = f"${current_value:,.2f}"
+            self.assertContains(response, formatted_value)
