@@ -545,3 +545,31 @@ class PortfolioDetailViewTest(TestCase):
             current_value = holding.stock.price(self.today)
             formatted_value = f"${current_value:,.4f}"
             self.assertContains(response, formatted_value)
+
+    def test_profit_calculation(self):
+        """The results of the profit calculation should be displayed."""
+        response = self.client.get(f"/portfolios/{self.test_portfolio.id}/")
+        start_date = self.test_date
+        end_date = start_date + timedelta(days=100)
+
+        profit, annualized_return = self.test_portfolio.profit(start_date, end_date)
+
+        # A thourough test should look up that the data is actually rendered in the page,
+        # but since it's rendered value depends on how the template renders it due to rounding
+        # and localization, we'll just check for the values to be present in the context.
+        self.assertEqual(response.context["profit"], profit)
+        self.assertEqual(response.context["annualized_return"], annualized_return)
+        self.assertEqual(response.context["start_date"], start_date)
+        self.assertEqual(response.context["end_date"], end_date)
+        self.assertEqual(
+            response.context["initial_value"],
+            self.test_portfolio.value(start_date),
+        )
+        self.assertEqual(
+            response.context["final_value"],
+            self.test_portfolio.value(end_date),
+        )
+        self.assertEqual(
+            response.context["days_held"],
+            (end_date - start_date).days,
+        )
