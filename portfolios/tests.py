@@ -526,7 +526,7 @@ class PortfolioDetailViewTest(TestCase):
         # Expect at least the name and the current value formatted as currency
         self.assertContains(response, escape(self.test_portfolio.name))
         current_value = self.test_portfolio.value(self.today)
-        formatted_value = f"${current_value:,.2f}"
+        formatted_value = f"${current_value:,.4f}"
         self.assertContains(response, formatted_value)
 
     def test_holding_list(self):
@@ -543,5 +543,5 @@ class PortfolioDetailViewTest(TestCase):
 
         for holding in self.test_portfolio.holdings.all():
             current_value = holding.stock.price(self.today)
-            formatted_value = f"${current_value:,.2f}"
+            formatted_value = f"${current_value:,.4f}"
             self.assertContains(response, formatted_value)

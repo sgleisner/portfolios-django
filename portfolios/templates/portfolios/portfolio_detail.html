@@ -9,12 +9,13 @@
     <h1>{{ portfolio.name }}</h1>
     <p>
       <strong>Current Value:</strong>
-      <span>${{ current_value|floatformat:2 }}</span>
+      <span>${{ portfolio.value }}</span>
     </p>
     <table border="1">
       <thead>
         <tr>
           <th>Stock</th>
+          <th>Share price</th>
           <th>Quantity</th>
         </tr>
       </thead>
@@ -22,6 +23,7 @@
         {% for holding in portfolio.holdings.all %}
         <tr>
           <td>{{ holding.stock.symbol }}</td>
+          <td>${{ holding.stock.price }}</td>
           <td>{{ holding.quantity }}</td>
         </tr>
         {% endfor %}
