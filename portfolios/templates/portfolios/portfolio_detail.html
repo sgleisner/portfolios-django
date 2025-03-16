@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Portfolio Detail</title>
+  </head>
+  <body>
+    <h1>{{ portfolio.name }}</h1>
+    <p>
+      <strong>Current Value:</strong>
+      <span>${{ current_value|floatformat:2 }}</span>
+    </p>
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Stock</th>
+          <th>Quantity</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for holding in portfolio.holdings.all %}
+        <tr>
+          <td>{{ holding.stock.symbol }}</td>
+          <td>{{ holding.quantity }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </body>
+</html>

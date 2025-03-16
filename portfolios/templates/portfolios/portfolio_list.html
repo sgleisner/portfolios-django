@@ -9,7 +9,9 @@
     <h1>Portfolios</h1>
     <ul>
       {% for portfolio in portfolios %}
-      <li>{{ portfolio.name }}</li>
+      <li>
+        <a href="/portfolios/{{ portfolio.id }}/">{{ portfolio.name }}</a>
+      </li>
       {% endfor %}
     </ul>
   </body>

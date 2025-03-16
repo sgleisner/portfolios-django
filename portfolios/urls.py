@@ -5,4 +5,9 @@ from . import views
 urlpatterns = [
     path("", lambda _: redirect("portfolios/", permanent=True)),
     path("portfolios/", views.PortfolioListView.as_view(), name="portfolio_list"),
+    path(
+        "portfolios/<int:pk>/",
+        views.PortfolioDetailView.as_view(),
+        name="portfolio_detail",
+    ),
 ]
