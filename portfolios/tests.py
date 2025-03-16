@@ -461,17 +461,68 @@ class PortfolioListViewTest(TestCase):
         for name in self.portfolio_names:
             Portfolio.objects.create(name=name)
 
-    def test_portfolio_list_view(self):
-        portfolios = Portfolio.objects.all()
+        self.portfolios = Portfolio.objects.all()
 
+    def test_portfolio_list_view(self):
+        """The page should be rendered with the list of portfolios."""
         response = self.client.get("/portfolios/")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "portfolios/portfolio_list.html")
         self.assertContains(response, "Portfolios")
 
-        for portfolio in portfolios:
+        for portfolio in self.portfolios:
             self.assertContains(response, escape(portfolio.name))
 
         self.assertQuerysetEqual(
-            response.context["portfolios"], portfolios, ordered=False
+            response.context["portfolios"], self.portfolios, ordered=False
         )
+
+    def test_links_to_detail_view(self):
+        """There should be a link to the detail view of each portfolio."""
+        response = self.client.get("/portfolios/")
+
+        for portfolio in Portfolio.objects.all():
+            self.assertContains(response, f'href="/portfolios/{portfolio.id}/"')
+
+
+class PortfolioDetailViewTest(TestCase):
+    def setUp(self):
+        self.test_portfolio = Portfolio.objects.create(name="Samy's Portfolio")
+        self.test_date = date(2016, 9, 18)
+        self.today = date.today()
+        self.test_holding_data = {
+            "JUEMS": 10,
+            "FNTLST": 20,
+            "MERYL": 30,
+            "GEORG": 40,
+            "BRAD": 50,
+            "CHUCK": 60,
+        }
+
+        for symbol, quantity in self.test_holding_data.items():
+            stock = Stock.objects.create(symbol=symbol)
+            Holding.objects.create(
+                portfolio=self.test_portfolio,
+                stock=stock,
+                quantity=quantity,
+            )
+
+    def test_portfolio_detail_view(self):
+        """The page should be rendered with the portfolio's details"""
+        response = self.client.get(f"/portfolios/{self.test_portfolio.id}/")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "portfolios/portfolio_detail.html")
+
+        # Expect at least the name and the current value formatted as currency
+        self.assertContains(response, escape(self.test_portfolio.name))
+        current_value = self.test_portfolio.value(self.today)
+        formatted_value = f"${current_value:,.2f}"
+        self.assertContains(response, formatted_value)
+
+    def test_holding_list(self):
+        """The list of holdings should be displayed."""
+        response = self.client.get(f"/portfolios/{self.test_portfolio.id}/")
+
+        for holding in self.test_portfolio.holdings.all():
+            self.assertContains(response, holding.stock.symbol)
+            self.assertContains(response, holding.quantity)
