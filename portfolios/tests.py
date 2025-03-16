@@ -4,6 +4,7 @@ from django.utils.html import escape
 from datetime import date, timedelta
 from decimal import Decimal
 from portfolios.models import Portfolio, Stock, StockPrice, Holding
+import statistics
 
 
 class PortfolioTest(TestCase):
@@ -273,6 +274,23 @@ class StockTest(TestCase):
         self.assertEqual(stock_price.stock, self.test_stock)
         self.assertEqual(stock_price.date, self.test_date)
         self.assertEqual(stock_price.price, created_price)
+
+    def test_price_create_new_value_variation(self):
+        """The random prices for a given stock should vary around +/- 10%."""
+        # In order to prevent unrealistic price volatility, we expect that
+        # for any given stock, its random prices are not too far apart.
+        prices = [
+            self.test_stock.price(self.test_date - timedelta(days=i))
+            for i in range(1000)  # arbitrary sample size
+        ]
+
+        # One normalized measure of dispersion is the coefficient of variation (CV):
+        mean = statistics.mean(prices)
+        std = statistics.stdev(prices)
+        cv = std / mean
+
+        # Expect prices to be within 5% of the mean
+        self.assertLess(cv, 0.05)
 
     def test_price_with_future(self):
         """The date passed to the `price` method must not be in the future."""
