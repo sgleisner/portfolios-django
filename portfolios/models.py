@@ -108,7 +108,16 @@ class Stock(models.Model):
             price = StockPrice.objects.get(stock=self, date=date).price
         except StockPrice.DoesNotExist:
             # Create a StockPrice with a fake random price and return its value.
-            random_price = Decimal(f"{random.uniform(1, 999999):.4f}")
+            # To reduce volatility for the same stock, we use the sybmol as a seed
+            # and return a value in its +/- 5% range.
+            random.seed(self.symbol)
+            base_price = random.uniform(1, 499999)
+            # reset the seed
+            random.seed()
+            random_price = Decimal(
+                f"{random.uniform(base_price * 0.95, base_price * 1.05):.4f}"
+            )
+
             price = StockPrice.objects.create(
                 stock=self, date=date, price=random_price
             ).price
