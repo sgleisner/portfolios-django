@@ -584,3 +584,35 @@ class PortfolioDetailViewTest(TestCase):
             results["final_value"],
             self.test_portfolio.value(end_date),
         )
+
+    def test_show_profit_holdings_details_table(self):
+        """The holding details table for the date range should be displayed."""
+        start_date = self.test_date
+        end_date = start_date + timedelta(days=100)
+
+        response = self.client.get(
+            f"/portfolios/{self.test_portfolio.id}/",
+            {"start_date": start_date, "end_date": end_date},
+        )
+
+        # Look up for the needed data for building the table in the context
+        results = response.context["results"]
+
+        expected_holdings_table = []
+        for holding in self.test_portfolio.holdings.all():
+            # Each holding row should have the stock symbol, initial share price,
+            # final share price, quantity and profit.
+            stock = holding.stock
+            price_delta = stock.price(end_date) - stock.price(start_date)
+            expected_holdings_table.append(
+                {
+                    "symbol": stock.symbol,
+                    "initial_price": stock.price(start_date),
+                    "final_price": stock.price(end_date),
+                    "quantity": holding.quantity,
+                    "profit": price_delta * holding.quantity,
+                }
+            )
+
+        # The table should be rendered in the context
+        self.assertEqual(results["holdings_table"], expected_holdings_table)
