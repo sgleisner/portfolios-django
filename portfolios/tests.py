@@ -556,13 +556,6 @@ class PortfolioDetailViewTest(TestCase):
             {"start_date": start_date, "end_date": end_date},
         )
 
-        print(
-            "Request GET Data:",
-            response.request["REQUEST_METHOD"],
-            response.request["PATH_INFO"],
-            response.request["QUERY_STRING"],
-        )
-
         profit, annualized_return = self.test_portfolio.profit(start_date, end_date)
 
         # A thourough test should look up that the data is actually rendered in the page,

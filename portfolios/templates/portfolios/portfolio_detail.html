@@ -15,16 +15,16 @@
       <thead>
         <tr>
           <th>Stock</th>
-          <th>Share price</th>
           <th>Quantity</th>
+          <th>Share price</th>
         </tr>
       </thead>
       <tbody>
         {% for holding in portfolio.holdings.all %}
         <tr>
           <td>{{ holding.stock.symbol }}</td>
-          <td>${{ holding.stock.price }}</td>
           <td>{{ holding.quantity }}</td>
+          <td>${{ holding.stock.price }}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -59,6 +59,29 @@
       <strong>Annualized return:</strong>
       <span>{{ results.annualized_return|floatformat:4 }}%</span>
     </p>
+
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Quantity</th>
+          <th>Initial share price</th>
+          <th>Final share price</th>
+          <th>Profit</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for holding in results.holdings_table %}
+        <tr>
+          <td>{{ holding.symbol }}</td>
+          <td>{{ holding.quantity }}</td>
+          <td>${{ holding.initial_price }}</td>
+          <td>${{ holding.final_price }}</td>
+          <td>${{ holding.profit }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
     {% endif %}
   </body>
 </html>

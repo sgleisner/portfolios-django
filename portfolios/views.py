@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from django.views.generic import ListView, DetailView
 from portfolios.forms import DateRangeForm
 from portfolios.models import Portfolio
@@ -31,6 +30,20 @@ class PortfolioDetailView(DetailView):
                 "initial_value": self.object.value(start_date),
                 "final_value": self.object.value(end_date),
                 "days_held": (end_date - start_date).days,
+                "holdings_table": [
+                    {
+                        "symbol": holding.stock.symbol,
+                        "initial_price": holding.stock.price(start_date),
+                        "final_price": holding.stock.price(end_date),
+                        "quantity": holding.quantity,
+                        "profit": holding.quantity
+                        * (
+                            holding.stock.price(end_date)
+                            - holding.stock.price(start_date)
+                        ),
+                    }
+                    for holding in self.object.holdings.all()
+                ],
             }
 
         context["form"] = form
