@@ -1,18 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolios</title>
-  </head>
-  <body>
-    <h1>Portfolios</h1>
-    <ul>
-      {% for portfolio in portfolios %}
+{% extends "portfolios/base.html" %}
+{% block content %}
+  <h1>Portfolios</h1>
+  <ul>
+    {% for portfolio in portfolios %}
       <li>
-        <a href="/portfolios/{{ portfolio.id }}/">{{ portfolio.name }}</a>
+        <a href="{% url 'portfolio_detail' portfolio.id %}">{{ portfolio.name }}</a>
       </li>
-      {% endfor %}
-    </ul>
-  </body>
-</html>
+    {% endfor %}
+  </ul>
+{% endblock content %}

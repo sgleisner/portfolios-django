@@ -1,42 +1,37 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio Detail</title>
-  </head>
-  <body>
-    <h1>{{ portfolio.name }}</h1>
-    <p>
-      <strong>Current Value:</strong>
-      <span>${{ portfolio.value }}</span>
-    </p>
-    <table border="1">
-      <thead>
-        <tr>
-          <th>Stock</th>
-          <th>Quantity</th>
-          <th>Share price</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for holding in portfolio.holdings.all %}
+{% extends "portfolios/base.html" %}
+{% block title %}
+  Portfolio Detail
+{% endblock title %}
+{% block content %}
+  <h1>{{ portfolio.name }}</h1>
+  <p>
+    <strong>Current Value:</strong>
+    <span>${{ portfolio.value }}</span>
+  </p>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Stock</th>
+        <th>Quantity</th>
+        <th>Share price</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for holding in portfolio.holdings.all %}
         <tr>
           <td>{{ holding.stock.symbol }}</td>
           <td>{{ holding.quantity }}</td>
           <td>${{ holding.stock.price }}</td>
         </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-    <h2>Profit Calculation</h2>
-    <form method="get">
-      {{ form.as_p }}
-      <button type="submit">Calculate Profit</button>
-    </form>
-
-    {% if results %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <h2>Profit Calculation</h2>
+  <form method="get">
+    {{ form.as_p }}
+    <button type="submit">Calculate Profit</button>
+  </form>
+  {% if results %}
     <h3>Profit from {{ results.start_date }} to {{ results.end_date }}</h3>
     <p>
       <strong>Initial value:</strong>
@@ -46,7 +41,6 @@
       <strong>Final value:</strong>
       <span>${{ results.final_value }}</span>
     </p>
-    <p></p>
     <p>
       <strong>Days held:</strong>
       <span>{{ results.days_held }}</span>
@@ -59,7 +53,6 @@
       <strong>Annualized return:</strong>
       <span>{{ results.annualized_return|floatformat:4 }}%</span>
     </p>
-
     <table border="1">
       <thead>
         <tr>
@@ -72,16 +65,15 @@
       </thead>
       <tbody>
         {% for holding in results.holdings_table %}
-        <tr>
-          <td>{{ holding.symbol }}</td>
-          <td>{{ holding.quantity }}</td>
-          <td>${{ holding.initial_price }}</td>
-          <td>${{ holding.final_price }}</td>
-          <td>${{ holding.profit }}</td>
-        </tr>
+          <tr>
+            <td>{{ holding.symbol }}</td>
+            <td>{{ holding.quantity }}</td>
+            <td>${{ holding.initial_price }}</td>
+            <td>${{ holding.final_price }}</td>
+            <td>${{ holding.profit }}</td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
-    {% endif %}
-  </body>
-</html>
+  {% endif %}
+{% endblock content %}
